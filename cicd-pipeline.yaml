@@ -9,7 +9,6 @@ Resources:
   b1S3Bucket:
     Type: AWS::S3::Bucket
     Properties: 
-      AccessControl: PublicReadWrite
       BucketName: b1-s3-bucket
       CorsConfiguration:
         CorsRules:
@@ -21,11 +20,22 @@ Resources:
               - GET
             AllowedOrigins:
               - '*'
+  b1S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref b1S3Bucket
+      PolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal: "*"
+            Action:
+              - "s3:GetObject"
+              - "s3:PutObject"
+            Resource: !Sub "arn:aws:s3:::${b1S3Bucket}/*"
 
   b2S3Bucket:
     Type: AWS::S3::Bucket
     Properties: 
-      AccessControl: PublicReadWrite
       BucketName: b2-s3-bucket
       CorsConfiguration:
         CorsRules:
@@ -37,7 +47,23 @@ Resources:
               - GET
             AllowedOrigins:
               - '*'
-  
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: "s3:ObjectCreated:Put"
+            Function: !GetAtt indexPhotosLambda.Arn
+  b2S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref b2S3Bucket
+      PolicyDocument:
+        Statement:
+          - Effect: "Allow"
+            Principal: "*"
+            Action:
+              - "s3:GetObject"
+              - "s3:PutObject"
+            Resource: !Sub "arn:aws:s3:::${b2S3Bucket}/*"
+
   # LAMBDA Functions
   searchPhotosLambda:
     Type: AWS::Lambda::Function
@@ -66,6 +92,14 @@ Resources:
       Code:
         S3Bucket: photolambda
         S3Key: index-photos.zip
+
+  indexPhotosLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: "lambda:InvokeFunction"
+      FunctionName: !GetAtt indexPhotosLambda.Arn
+      Principal: "s3.amazonaws.com"
+      SourceArn: !GetAtt b2S3Bucket.Arn
 
   # IAM Role
   AllLambdaRole:
