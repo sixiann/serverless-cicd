@@ -43,21 +43,21 @@ Resources:
       Properties:
         Description: "Search Photos Lambda Function"
         FunctionName: search-photos-new
-        Handler: search-photos-new::lambda_function.Function::lambda_handler
+        Handler: lambda_function.lambda_handler 
         MemorySize: 128
         Role: !GetAtt searchPhotosIAM.Arn
         Runtime: python3.9
         Timeout: 30
         Code:
-          S3Bucket: search_photos
-          S3Key: #insert path to deployment package
+          S3Bucket: search_photos #preexisting bucket that contains lambda code 
+          S3Key: #insert path to deployment package #
 
   LF1Lambda:
     Type: AWS::Lambda::Function
     Properties:
       Description: "LF1 Lambda Function"
       FunctionName: LF1_photo-new
-      Handler: LF1_photo-new::lambda_function.Function::lambda_handler
+      Handler: lambda_function.lambda_handler
       MemorySize: 128
       Role: !GetAtt LF1IAM.Arn
       Runtime: python3.9
