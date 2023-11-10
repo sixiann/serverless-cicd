@@ -82,27 +82,15 @@ Resources:
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
-            # Combined Statements from indexPhotosIamRole
             - Effect: "Allow"
               Action:
                 - "logs:CreateLogGroup"
                 - "logs:CreateLogStream"
                 - "logs:PutLogEvents"
-              Resource: "arn:aws:logs:us-east-1:062168545775:log-group:/aws/lambda/index-photos:*"
-            - Effect: "Allow"
-              Action:
                 - "s3:*"
                 - "s3-object-lambda:*"
                 - "rekognition:*"
                 - "es:*"
-              Resource: "*"
-            
-            # Combined Statements from searchPhotosIamRole
-            - Effect: "Allow"
-              Action:
-                - "logs:CreateLogGroup"
-                - "logs:CreateLogStream"
-                - "logs:PutLogEvents"
                 - "cloudwatch:GetMetricStatistics"
                 - "cloudwatch:DescribeAlarms"
                 - "cloudwatch:DescribeAlarmsForMetric"
@@ -126,30 +114,12 @@ Resources:
                 - "iam:GetServiceLinkedRoleDeletionStatus"
                 - "iam:PassRole"
               Resource: "*"
-              Condition:
-                StringEquals:
-                  iam:Principal: "lex.amazonaws.com"
-                  iam:AWSServiceName:
-                    - "lex.amazonaws.com"
-                    - "channels.lex.amazonaws.com"
-                    - "lexv2.amazonaws.com"
-                    - "channels.lexv2.amazonaws.com"
-
-            # Statements from uploadPhotosIamRole
-            - Effect: "Allow"
-              Action:
-                - "logs:CreateLogGroup"
-                - "logs:CreateLogStream"
-                - "logs:PutLogEvents"
-              Resource: "arn:aws:logs:us-east-1:062168545775:log-group:/aws/lambda/upload-photos:*"
 
     ManagedPolicyArns: 
       - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
       - "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess"
       - "arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess"
       - "arn:aws:iam::aws:policy/AmazonLexFullAccess"
-
-
   
   # AllLambdaRole:
   #   Type: AWS::IAM::Role
