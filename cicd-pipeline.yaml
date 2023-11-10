@@ -10,7 +10,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties: 
       AccessControl: PublicReadWrite
-      BucketName: !Sub #insertName 
+      BucketName: b1S3Bucket
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
@@ -25,7 +25,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties: 
       AccessControl: PublicReadWrite
-      BucketName: !Sub #insertName -${Environment}
+      BucketName: b2S3Bucket
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
@@ -42,8 +42,8 @@ Resources:
     Type: AWS::Lambda::Function
       Properties:
         Description: "Search Photos Lambda Function"
-        FunctionName: !Sub #insert name 
-        Handler: search-photos::lambda_function.Function::lambda_handler
+        FunctionName: search-photos-new
+        Handler: search-photos-new::lambda_function.Function::lambda_handler
         MemorySize: 128
         Role: !GetAtt searchPhotosIAM.Arn
         Runtime: python3.9
@@ -56,8 +56,8 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Description: "LF1 Lambda Function"
-      FunctionName: !Sub #insert name
-      Handler: index-photos::lambda_function.Function::lambda_handler
+      FunctionName: LF1_photo-new
+      Handler: LF1_photo-new::lambda_function.Function::lambda_handler
       MemorySize: 128
       Role: !GetAtt LF1IAM.Arn
       Runtime: python3.9
