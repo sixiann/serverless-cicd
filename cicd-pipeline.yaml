@@ -40,17 +40,17 @@ Resources:
   # LAMBDA Functions
   searchPhotosLambda:
     Type: AWS::Lambda::Function
-      Properties:
-        Description: "Search Photos Lambda Function"
-        FunctionName: search-photos-new
-        Handler: lambda_function.lambda_handler 
-        MemorySize: 128
-        Role: !GetAtt AllLambdaRole.Arn
-        Runtime: python3.9
-        Timeout: 30
-        Code:
-          S3Bucket: photolambda 
-          S3Key: search-photos.zip
+    Properties:
+      Description: "Search Photos Lambda Function"
+      FunctionName: search-photos-new
+      Handler: lambda_function.lambda_handler
+      MemorySize: 128
+      Role: !GetAtt AllLambdaRole.Arn
+      Runtime: python3.9
+      Timeout: 30
+      Code:
+        S3Bucket: photolambda
+        S3Key: search-photos.zip
 
   indexPhotosLambda:
     Type: AWS::Lambda::Function
@@ -66,268 +66,56 @@ Resources:
         S3Bucket: photolambda
         S3Key: index-photos.zip
 
-  # make changes to IAM roles
+  # IAM Role
   AllLambdaRole:
-  Type: AWS::IAM::Role
-  Properties:
-    AssumeRolePolicyDocument: 
-      Version: '2012-10-17'
-      Statement:
-        - Effect: "Allow"
-          Principal:
-            Service: lambda.amazonaws.com
-          Action: sts:AssumeRole
-    Policies:
-      - PolicyName: "AllLambdaCombinedPolicy"
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: "Allow"
-              Action:
-                - "logs:CreateLogGroup"
-                - "logs:CreateLogStream"
-                - "logs:PutLogEvents"
-                - "s3:*"
-                - "s3-object-lambda:*"
-                - "rekognition:*"
-                - "es:*"
-                - "cloudwatch:GetMetricStatistics"
-                - "cloudwatch:DescribeAlarms"
-                - "cloudwatch:DescribeAlarmsForMetric"
-                - "kms:DescribeKey"
-                - "kms:ListAliases"
-                - "lambda:GetPolicy"
-                - "lambda:ListFunctions"
-                - "lex:*"
-                - "polly:DescribeVoices"
-                - "polly:SynthesizeSpeech"
-                - "kendra:ListIndices"
-                - "iam:ListRoles"
-                - "s3:ListAllMyBuckets"
-                - "logs:DescribeLogGroups"
-                - "s3:GetBucketLocation"
-                - "lambda:AddPermission"
-                - "lambda:RemovePermission"
-                - "iam:GetRole"
-                - "iam:CreateServiceLinkedRole"
-                - "iam:DeleteServiceLinkedRole"
-                - "iam:GetServiceLinkedRoleDeletionStatus"
-                - "iam:PassRole"
-              Resource: "*"
-
-    ManagedPolicyArns: 
-      - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-      - "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess"
-      - "arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess"
-      - "arn:aws:iam::aws:policy/AmazonLexFullAccess"
-  
-  # AllLambdaRole:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     AssumeRolePolicyDocument: 
-  #       Version: '2012-10-17'
-  #       Statement:
-  #         - Effect: "Allow"
-  #           Principal:
-  #             Service: lambda.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     ManagedPolicyArns: 
-  #       - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
-  #       - 'arn:aws:iam::aws:policy/AmazonRekognitionFullAccess'
-  #       - 'arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess'
-  #       - 'arn:aws:iam::aws:policy/AmazonLexFullAccess'
-
-
-        
-  #     Policies:
-  #       - PolicyName: AllLambdaFunctionPolicy
-  #         PolicyDocument:
-  #           Version: "2012-10-17"
-  #           Statement:
-  #             - Effect: "Allow"
-  #               Action:
-  #                 - "logs:CreateLogGroup"
-  #                 - "logs:CreateLogStream"
-  #                 - "logs:PutLogEvents"
-  #               Resource: "arn:aws:logs:us-east-1:062168545775:log-group:/aws/lambda/LF1_photo:*"
-  #           Version: '2012-10-17'
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - s3:*
-  #                 - s3-object-lambda:*
-  #               Resource: '*'
-  #           Version: '2012-10-17'
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - rekognition:*
-  #               Resource: '*'
-  #           Version: '2012-10-17'
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - es:*
-  #               Resource: '*'
-
-  
-  # searchPhotosIAM:
-  #   Type: AWS::IAM::Role
-  #   Properties:
-  #     AssumeRolePolicyDocument: 
-  #       Version: '2012-10-17'
-  #       Statement:
-  #         - Effect: "Allow"
-  #           Principal:
-  #             Service: lambda.amazonaws.com
-  #           Action: sts:AssumeRole
-  #     Policies:
-  #       - PolicyName: "LF2LambdaPolicy"
-  #         PolicyDocument:
-  #           Version: '2012-10-17'
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - logs:CreateLogStream
-  #                 - logs:PutLogEvents
-  #                 - logs:CreateLogGroup
-  #               Resource: arn:aws:logs:*:*:*
-  #           Version: '2012-10-17'
-  #           Statement:
-  #             - Effect: Allow
-  #               Action:
-  #                 - cloudwatch:GetMetricStatistics
-  #                 - cloudwatch:DescribeAlarms
-  #                 - cloudwatch:DescribeAlarmsForMetric
-  #                 - kms:DescribeKey
-  #                 - kms:ListAliases
-  #                 - lambda:GetPolicy
-  #                 - lambda:ListFunctions
-  #                 - lex:*
-  #                 - polly:DescribeVoices
-  #                 - polly:SynthesizeSpeech
-  #                 - kendra:ListIndices
-  #                 - iam:ListRoles
-  #                 - s3:ListAllMyBuckets
-  #                 - logs:DescribeLogGroups
-  #                 - s3:GetBucketLocation
-  #               Resource:
-  #                 - '*'
-  #             - Effect: Allow
-  #               Action:
-  #                 - lambda:AddPermission
-  #                 - lambda:RemovePermission
-  #               Resource: arn:aws:lambda:*:*:function:AmazonLex*
-  #               Condition:
-  #                 StringEquals:
-  #                   lambda:Principal: lex.amazonaws.com
-  #             - Effect: Allow
-  #               Action:
-  #                 - iam:GetRole
-  #               Resource:
-  #                 - arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots
-  #                 - arn:aws:iam::*:role/aws-service-role/channels.lex.amazonaws.com/AWSServiceRoleForLexChannels
-  #                 - arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*
-  #                 - arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*
-  #             - Effect: Allow
-  #               Action:
-  #                 - iam:CreateServiceLinkedRole
-  #               Resource:
-  #                 - arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots
-  #               Condition:
-  #                 StringEquals:
-  #                   iam:AWSServiceName: lex.amazonaws.com
-  #             - Effect: Allow
-  #               Action:
-  #                 - iam:CreateServiceLinkedRole
-  #               Resource:
-  #                 - arn:aws:iam::*:role/aws-service-role/channels.lex.amazonaws.com/AWSServiceRoleForLexChannels
-  #               Condition:
-  #                 StringEquals:
-  #                   iam:AWSServiceName: channels.lex.amazonaws.com
-  #             - Effect: Allow
-  #               Action:
-  #                 - iam:CreateServiceLinkedRole
-  #               Resource:
-  #                 - arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*
-  #               Condition:
-  #                 StringEquals:
-  #                   iam:AWSServiceName: lexv2.amazonaws.com
-  #             - Effect: Allow
-  #               Action:
-  #                 - iam:CreateServiceLinkedRole
-  #               Resource:
-  #                 - arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*
-  #               Condition:
-  #                 StringEquals:
-  #                   iam:AWSServiceName: channels.lexv2.amazonaws.com
-  #             - Effect: Allow
-  #               Action:
-  #                 - iam:DeleteServiceLinkedRole
-  #                 - iam:GetServiceLinkedRoleDeletionStatus
-  #               Resource:
-  #                 - arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots
-  #                 - arn:aws:iam::*:role/aws-service-role/channels.lex.amazonaws.com/AWSServiceRoleForLexChannels
-  #                 - arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*
-  #                 - arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*
-  #             - Effect: Allow
-  #               Action:
-  #                 - iam:PassRole
-  #               Resource:
-  #                 - arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots
-  #               Condition:
-  #                 StringEquals:
-  #                   iam:PassedToService:
-  #                     - lex.amazonaws.com
-  #             - Effect: Allow
-  #               Action:
-  #                 - iam:PassRole
-  #               Resource:
-  #                 - arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*
-  #               Condition:
-  #                 StringEquals:
-  #                   iam:PassedToService:
-  #                     - lexv2.amazonaws.com
-  #             - Effect: Allow
-  #               Action:
-  #                 - iam:PassRole
-  #               Resource:
-  #                 - arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*
-  #               Condition:
-  #                 StringEquals:
-  #                   iam:PassedToService:
-  #                     - channels.lexv2.amazonaws.com
-  
-  
-  # ClientBucket:
-  #   Type: AWS::S3::Bucket
-  #   Properties:
-  #     OwnershipControls:
-  #       Rules:
-  #       - ObjectOwnership: BucketOwnerPreferred
-  #     PublicAccessBlockConfiguration:
-  #       BlockPublicAcls: false
-  #       BlockPublicPolicy: false
-  #       IgnorePublicAcls: false
-  #       RestrictPublicBuckets: false
-  #     WebsiteConfiguration:
-  #       IndexDocument: index.html
-  #       ErrorDocument: index.html
-
-  # BucketPolicy:
-  #   Type: AWS::S3::BucketPolicy
-  #   Properties:
-  #     PolicyDocument:
-  #       Id: PublicWebsitePolicy
-  #       Version: 2012-10-17
-  #       Statement:
-  #         - Sid: PublicReadForGetBucketObjects
-  #           Effect: Allow
-  #           Principal: '*'
-  #           Action: 's3:GetObject'
-  #           Resource: !Join
-  #             - ''
-  #             - - 'arn:aws:s3:::'
-  #               - !Ref ClientBucket
-  #               - /*
-  #     Bucket: !Ref ClientBucket
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: '2012-10-17'
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: "AllLambdaCombinedPolicy"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "s3:*"
+                  - "s3-object-lambda:*"
+                  - "rekognition:*"
+                  - "es:*"
+                  - "cloudwatch:GetMetricStatistics"
+                  - "cloudwatch:DescribeAlarms"
+                  - "cloudwatch:DescribeAlarmsForMetric"
+                  - "kms:DescribeKey"
+                  - "kms:ListAliases"
+                  - "lambda:GetPolicy"
+                  - "lambda:ListFunctions"
+                  - "lex:*"
+                  - "polly:DescribeVoices"
+                  - "polly:SynthesizeSpeech"
+                  - "kendra:ListIndices"
+                  - "iam:ListRoles"
+                  - "s3:ListAllMyBuckets"
+                  - "logs:DescribeLogGroups"
+                  - "s3:GetBucketLocation"
+                  - "lambda:AddPermission"
+                  - "lambda:RemovePermission"
+                  - "iam:GetRole"
+                  - "iam:CreateServiceLinkedRole"
+                  - "iam:DeleteServiceLinkedRole"
+                  - "iam:GetServiceLinkedRoleDeletionStatus"
+                  - "iam:PassRole"
+                Resource: "*"
+          ManagedPolicyArns: 
+            - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+            - "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess"
+            - "arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess"
+            - "arn:aws:iam::aws:policy/AmazonLexFullAccess"
