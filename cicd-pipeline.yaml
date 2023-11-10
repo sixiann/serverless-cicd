@@ -21,6 +21,7 @@ Resources:
               - GET
             AllowedOrigins:
               - '*'
+
   b2S3Bucket:
     Type: AWS::S3::Bucket
     Properties: 
