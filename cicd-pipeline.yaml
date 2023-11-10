@@ -49,24 +49,26 @@ Resources:
         Runtime: python3.9
         Timeout: 30
         Code:
-          S3Bucket: search_photos #preexisting bucket that contains lambda code 
-          S3Key: #insert path to deployment package #
+          S3Bucket: photolambda 
+          S3Key: search-photos.zip
 
-  LF1Lambda:
+  indexPhotosLambda:
     Type: AWS::Lambda::Function
     Properties:
-      Description: "LF1 Lambda Function"
-      FunctionName: LF1_photo-new
+      Description: "Index Photos Lambda Function"
+      FunctionName: index-photos-new
       Handler: lambda_function.lambda_handler
       MemorySize: 128
-      Role: !GetAtt LF1IAM.Arn
+      Role: !GetAtt indexPhotosIAM.Arn
       Runtime: python3.9
       Timeout: 30
       Code:
-        S3Bucket: LF1_photo
-        S3Key: #insert path to deployment package
-  
-  LF1IAM:
+        S3Bucket: photolambda
+        S3Key: index-photos.zip
+
+
+  ###make changes to IAM roles
+  indexPhotosIAM:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument: 
@@ -119,7 +121,7 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: "searchPhotosLambdaPolicy"
+        - PolicyName: "LF2LambdaPolicy"
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
