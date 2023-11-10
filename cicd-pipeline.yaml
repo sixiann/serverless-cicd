@@ -124,14 +124,11 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
-                Action: logs:CreateLogGroup
-                Resource: arn:aws:logs:us-east-1:062168545775:*
-              - Effect: Allow
                 Action:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource:
-                  - arn:aws:logs:us-east-1:062168545775:log-group:/aws/lambda/search-photos:*
+                  - logs:CreateLogGroup
+                Resource: arn:aws:logs:*:*:*
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
