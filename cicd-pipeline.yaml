@@ -10,7 +10,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties: 
       AccessControl: PublicReadWrite
-      BucketName: b1S3Bucket
+      BucketName: b1-s3-bucket
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
@@ -26,7 +26,7 @@ Resources:
     Type: AWS::S3::Bucket
     Properties: 
       AccessControl: PublicReadWrite
-      BucketName: b2S3Bucket
+      BucketName: b2-s3-bucket
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
@@ -115,8 +115,8 @@ Resources:
                   - "iam:GetServiceLinkedRoleDeletionStatus"
                   - "iam:PassRole"
                 Resource: "*"
-          ManagedPolicyArns: 
-            - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
-            - "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess"
-            - "arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess"
-            - "arn:aws:iam::aws:policy/AmazonLexFullAccess"
+      ManagedPolicyArns: 
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+        - "arn:aws:iam::aws:policy/AmazonRekognitionFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonOpenSearchServiceFullAccess"
+        - "arn:aws:iam::aws:policy/AmazonLexFullAccess"
