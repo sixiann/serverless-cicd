@@ -5,35 +5,269 @@ Resources:
   AssetsBucket:
     Type: AWS::S3::Bucket
 
-  ClientBucket:
+  # S3 BUCKETS
+  b1S3Bucket:
     Type: AWS::S3::Bucket
-    Properties:
-      OwnershipControls:
-        Rules:
-        - ObjectOwnership: BucketOwnerPreferred
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: index.html
+    Properties: 
+      AccessControl: PublicReadWrite
+      BucketName: !Sub #insertName 
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - HEAD
+              - GET
+            AllowedOrigins:
+              - '*'
+  b2S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      AccessControl: PublicReadWrite
+      BucketName: !Sub #insertName -${Environment}
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - PUT
+              - HEAD
+              - GET
+            AllowedOrigins:
+              - '*'
+  
+  # LAMBDA Functions
+  searchPhotosLambda:
+    Type: AWS::Lambda::Function
+      Properties:
+        Description: "Search Photos Lambda Function"
+        FunctionName: !Sub #insert name 
+        Handler: search-photos::lambda_function.Function::lambda_handler
+        MemorySize: 128
+        Role: !GetAtt searchPhotosIAM.Arn
+        Runtime: python3.9
+        Timeout: 30
+        Code:
+          S3Bucket: search_photos
+          S3Key: #insert path to deployment package
 
-  BucketPolicy:
-    Type: AWS::S3::BucketPolicy
+  LF1Lambda:
+    Type: AWS::Lambda::Function
     Properties:
-      PolicyDocument:
-        Id: PublicWebsitePolicy
-        Version: 2012-10-17
+      Description: "LF1 Lambda Function"
+      FunctionName: !Sub #insert name
+      Handler: index-photos::lambda_function.Function::lambda_handler
+      MemorySize: 128
+      Role: !GetAtt LF1IAM.Arn
+      Runtime: python3.9
+      Timeout: 30
+      Code:
+        S3Bucket: LF1_photo
+        S3Key: #insert path to deployment package
+  
+  LF1IAM:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: '2012-10-17'
         Statement:
-          - Sid: PublicReadForGetBucketObjects
-            Effect: Allow
-            Principal: '*'
-            Action: 's3:GetObject'
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref ClientBucket
-                - /*
-      Bucket: !Ref ClientBucket
+          - Effect: "Allow"
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: "LF1LambdaPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:us-east-1:062168545775:log-group:/aws/lambda/LF1_photo:*"
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:*
+                  - s3-object-lambda:*
+                Resource: '*'
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - rekognition:*
+                Resource: '*'
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - es:*
+                Resource: '*'
+
+  
+  searchPhotosIAM:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: '2012-10-17'
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: "searchPhotosLambdaPolicy"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: logs:CreateLogGroup
+                Resource: arn:aws:logs:us-east-1:062168545775:*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - arn:aws:logs:us-east-1:062168545775:log-group:/aws/lambda/search-photos:*
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cloudwatch:GetMetricStatistics
+                  - cloudwatch:DescribeAlarms
+                  - cloudwatch:DescribeAlarmsForMetric
+                  - kms:DescribeKey
+                  - kms:ListAliases
+                  - lambda:GetPolicy
+                  - lambda:ListFunctions
+                  - lex:*
+                  - polly:DescribeVoices
+                  - polly:SynthesizeSpeech
+                  - kendra:ListIndices
+                  - iam:ListRoles
+                  - s3:ListAllMyBuckets
+                  - logs:DescribeLogGroups
+                  - s3:GetBucketLocation
+                Resource:
+                  - '*'
+              - Effect: Allow
+                Action:
+                  - lambda:AddPermission
+                  - lambda:RemovePermission
+                Resource: arn:aws:lambda:*:*:function:AmazonLex*
+                Condition:
+                  StringEquals:
+                    lambda:Principal: lex.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - iam:GetRole
+                Resource:
+                  - arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots
+                  - arn:aws:iam::*:role/aws-service-role/channels.lex.amazonaws.com/AWSServiceRoleForLexChannels
+                  - arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*
+                  - arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*
+              - Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource:
+                  - arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName: lex.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource:
+                  - arn:aws:iam::*:role/aws-service-role/channels.lex.amazonaws.com/AWSServiceRoleForLexChannels
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName: channels.lex.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource:
+                  - arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName: lexv2.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - iam:CreateServiceLinkedRole
+                Resource:
+                  - arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*
+                Condition:
+                  StringEquals:
+                    iam:AWSServiceName: channels.lexv2.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - iam:DeleteServiceLinkedRole
+                  - iam:GetServiceLinkedRoleDeletionStatus
+                Resource:
+                  - arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots
+                  - arn:aws:iam::*:role/aws-service-role/channels.lex.amazonaws.com/AWSServiceRoleForLexChannels
+                  - arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*
+                  - arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - arn:aws:iam::*:role/aws-service-role/lex.amazonaws.com/AWSServiceRoleForLexBots
+                Condition:
+                  StringEquals:
+                    iam:PassedToService:
+                      - lex.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - arn:aws:iam::*:role/aws-service-role/lexv2.amazonaws.com/AWSServiceRoleForLexV2Bots*
+                Condition:
+                  StringEquals:
+                    iam:PassedToService:
+                      - lexv2.amazonaws.com
+              - Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource:
+                  - arn:aws:iam::*:role/aws-service-role/channels.lexv2.amazonaws.com/AWSServiceRoleForLexV2Channels*
+                Condition:
+                  StringEquals:
+                    iam:PassedToService:
+                      - channels.lexv2.amazonaws.com
+  
+  
+  # ClientBucket:
+  #   Type: AWS::S3::Bucket
+  #   Properties:
+  #     OwnershipControls:
+  #       Rules:
+  #       - ObjectOwnership: BucketOwnerPreferred
+  #     PublicAccessBlockConfiguration:
+  #       BlockPublicAcls: false
+  #       BlockPublicPolicy: false
+  #       IgnorePublicAcls: false
+  #       RestrictPublicBuckets: false
+  #     WebsiteConfiguration:
+  #       IndexDocument: index.html
+  #       ErrorDocument: index.html
+
+  # BucketPolicy:
+  #   Type: AWS::S3::BucketPolicy
+  #   Properties:
+  #     PolicyDocument:
+  #       Id: PublicWebsitePolicy
+  #       Version: 2012-10-17
+  #       Statement:
+  #         - Sid: PublicReadForGetBucketObjects
+  #           Effect: Allow
+  #           Principal: '*'
+  #           Action: 's3:GetObject'
+  #           Resource: !Join
+  #             - ''
+  #             - - 'arn:aws:s3:::'
+  #               - !Ref ClientBucket
+  #               - /*
+  #     Bucket: !Ref ClientBucket
